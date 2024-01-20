@@ -2,7 +2,7 @@ package org.bookstore.java;
 
 import java.io.*;
 import java.sql.*;
-import java.util.*;
+import java.util.Scanner;
 
 public class Main {
     static String jdbcURL;
@@ -13,13 +13,41 @@ public class Main {
     public static void main(String[] args) {
         try {
             connectToDB();
-            setUpDatabase();
+
+            boolean fin = false;
+            Scanner commandInput = new Scanner(System.in);
+
+            while (!fin) {
+                System.out.println("""
+                    Commands
+                    1 - set up database
+                    2 - update book info
+                    3 - update customer info
+                    4 - list books by genre
+                    5 - list books by author
+                    6 - list customer purchase history
+                    7 - list sales history
+                    8 - list total revenue by genre
+                    9 - finish
+                    input : """);
+                String command = commandInput.nextLine();
+                switch (command) {
+                    case "1" -> setUpDatabase();
+                    case "2" -> updateBookDetails();
+                    case "3" -> updateCustomerDetails();
+                    case "4" -> listBooksByGenre();
+                    case "5" -> listBooksByAuthor();
+                    case "6" -> listCustomerPurchaseHistory();
+                    case "7" -> listSaleHistory();
+                    case "8" -> generateTotalRevenueByGenre();
+                    case "9" -> fin = true;
+                }
+            }
             disconnectFromDB();
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
-
     private static void connectToDB() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Insert the database URL");
@@ -31,10 +59,9 @@ public class Main {
         connection = DriverManager.getConnection(jdbcURL, username, password);
         System.out.println("connected");
     }
-
     public static void setUpDatabase() throws SQLException {
         StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/setUpDatabase.sql"));) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/setUpDatabase.sql"))) {
             String string;
             while ((string = bufferedReader.readLine()) != null) {
                 stringBuilder.append(string).append('\n');
@@ -45,7 +72,6 @@ public class Main {
         statement.execute(stringBuilder.toString());
         statement.close();
     }
-
     private static void updateBookDetails() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.print("book id: ");
@@ -110,7 +136,6 @@ public class Main {
         preparedStatement.execute();
         preparedStatement.close();
     }
-
     //Vulnerability
     private static void listBooksByGenre() throws SQLException {
         Scanner scanner = new Scanner(System.in);
@@ -137,7 +162,7 @@ public class Main {
         ResultSet resultSet = statement.executeQuery("SELECT * FROM books WHERE author='" + author + "';");
         System.out.println("Book ID, Title, Author, Genre, Price, Quantity");
         while (resultSet.next()) {
-            int id = resultSet.getInt("bookid");
+            int id = resultSet.getInt("bookId");
             String title = resultSet.getString("title");
             String genre = resultSet.getString("genre");
             double price = resultSet.getDouble("price");
@@ -145,7 +170,6 @@ public class Main {
             System.out.println(id + ", " + title + ", " + author + ", " + genre + ", " + price + ", " + quantity);
         }
     }
-
     //Vulnerability
     private static void listCustomerPurchaseHistory() throws SQLException {
         Scanner scanner = new Scanner(System.in);
@@ -155,12 +179,11 @@ public class Main {
         ResultSet resultSet = statement.executeQuery("SELECT * FROM sales WHERE customerid='" + customerId + "';");
         System.out.println("Sale ID, Book ID, Customer ID, Date Of Sale, Quantity Sold, Total Price");
         while (resultSet.next()) {
-            int saleId = resultSet.getInt("saleid");
-            int bookId = resultSet.getInt("bookid");
-            Date dateOfSale = resultSet.getDate("dateofsale");
-            int quantitySold = resultSet.getInt("quantitysold");
-            double totalPrice = resultSet.getDouble("totalprice");
-            int quantity = resultSet.getInt("quantity");
+            int saleId = resultSet.getInt("saleId");
+            int bookId = resultSet.getInt("bookId");
+            Date dateOfSale = resultSet.getDate("dateOfSale");
+            int quantitySold = resultSet.getInt("quantitySold");
+            double totalPrice = resultSet.getDouble("totalPrice");
             System.out.println(saleId + ", " + bookId + ", " + customerId + ", " + dateOfSale + ", " + quantitySold + ", " + totalPrice);
         }
     }
@@ -205,7 +228,6 @@ public class Main {
             case "phone" -> updateCustomerPhone(id);
         }
     }
-
     private static void updateCustomerPhone(int id) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter new name");
@@ -216,7 +238,6 @@ public class Main {
         preparedStatement.execute();
         preparedStatement.close();
     }
-
     private static void updateCustomerEmail(int id) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter new name");
@@ -227,7 +248,6 @@ public class Main {
         preparedStatement.execute();
         preparedStatement.close();
     }
-
     private static void updateCustomerName(int id) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter new name");
@@ -238,7 +258,6 @@ public class Main {
         preparedStatement.execute();
         preparedStatement.close();
     }
-
     private static void disconnectFromDB() throws SQLException {
         connection.close();
         System.out.println("disconnected");

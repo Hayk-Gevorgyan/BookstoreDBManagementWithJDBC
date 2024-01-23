@@ -45,7 +45,7 @@ public class Main {
             }
             disconnectFromDB();
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
     private static void connectToDB() throws SQLException {
